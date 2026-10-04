@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>For You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #1f1b3d;
+    --night-2: #2b2655;
+    --moon: #f4efff;
+    --apricot: #ffb38a;
+    --rose: #ff7e9d;
+    --muted: #b9b2d6;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--night);
+    color: var(--moon);
+    font-family: "DM Sans", system-ui, sans-serif;
+    line-height: 1.65;
+    font-size: 18px;
+  }
+  body.intro-active { overflow: hidden; }
+  body.intro-active .heart-rain { z-index: 11; }
+  .intro-screen {
+    position: fixed; z-index: 10; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 24px; text-align: center;
+    background: radial-gradient(ellipse at 50% 75%, #4a3a8a 0%, var(--night) 65%);
+    transition: opacity .7s ease, visibility .7s ease;
+  }
+  .intro-screen.is-leaving { opacity: 0; visibility: hidden; }
+  .intro-screen .eyebrow {
+    color: var(--apricot); text-transform: uppercase; letter-spacing: .24em;
+    font-size: .75rem; font-weight: 500;
+  }
+  .intro-screen h1 {
+    margin: 8px 0 10px; font-size: clamp(3.5rem, 14vw, 7.5rem);
+    color: var(--moon); text-shadow: 0 0 38px #ff7e9d66;
+  }
+  .intro-screen p { color: var(--muted); }
+  .intro-heart {
+    width: 88px; height: 88px; margin-top: 32px; border: 1px solid #ffb38a88;
+    border-radius: 50%; background: #2b2655aa; color: var(--rose);
+    font-size: 2.8rem; cursor: pointer; box-shadow: 0 0 35px #ff7e9d33;
+    animation: heart-beat 1.6s ease-in-out infinite;
+  }
+  .intro-heart:hover { background: #433769; }
+  @keyframes heart-beat { 50% { transform: scale(1.1); } }
+  .heart-rain {
+    position: fixed; z-index: 0; inset: 0; overflow: hidden; pointer-events: none;
+  }
+  .floating-heart {
+    position: absolute; bottom: -12vh; left: var(--heart-left);
+    color: var(--rose); font-size: var(--heart-size); opacity: 0;
+    animation: float-heart var(--heart-duration) linear var(--heart-delay) infinite;
+    text-shadow: 0 0 18px #ff7e9d66;
+  }
+  @keyframes float-heart {
+    8% { opacity: .22; }
+    80% { opacity: .16; }
+    100% { transform: translate3d(28px, -120vh, 0) rotate(28deg); opacity: 0; }
+  }
+  .hero, body > section, footer { position: relative; z-index: 1; }
+  h1, h2 { font-family: "Young Serif", Georgia, serif; font-weight: 400; line-height: 1.1; }
+  section { padding: 96px 24px; max-width: 760px; margin: 0 auto; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--apricot); outline-offset: 4px; }
+
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
+    max-width: none; text-align: center; position: relative; overflow: hidden;
+    background: radial-gradient(ellipse at 50% 120%, #4a3a8a 0%, var(--night) 60%);
+  }
+  .hero::before, .hero::after {
+    content: ""; position: absolute; left: 50%; top: 40%;
+    width: min(78vw, 490px); aspect-ratio: 1; border: 1px solid #ffb38a22;
+    border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;
+  }
+  .hero::after { width: min(63vw, 390px); border-color: #f4efff18; }
+  .hero > :not(.star) { position: relative; z-index: 1; }
+  .hero .eyebrow {
+    color: var(--apricot); text-transform: uppercase; letter-spacing: .24em;
+    font-size: .75rem; font-weight: 500;
+  }
+  .hero h1 {
+    margin: 8px 0 10px; font-size: clamp(3.5rem, 14vw, 7.5rem);
+    color: var(--moon); text-shadow: 0 0 38px #ff7e9d66;
+  }
+  .hero .love-line { color: var(--muted); max-width: none; margin-top: 0; }
+  .sub { color: var(--muted); max-width: 34ch; margin: 12px auto 0; }
+  .star { position: absolute; width: 3px; height: 3px; background: var(--moon); border-radius: 50%; opacity: .5; animation: twinkle 4s ease-in-out infinite; }
+  @keyframes twinkle { 50% { opacity: .1; } }
+  h2 { font-size: clamp(1.8rem, 5vw, 2.6rem); margin-bottom: 40px; }
+  .timeline { list-style: none; padding: 0 0 0 28px; border-left: 2px solid var(--night-2); }
+  .timeline li { position: relative; padding: 0 0 36px 24px; }
+  .timeline li::before {
+    content: ""; position: absolute; left: -37px; top: 8px; width: 14px; height: 14px;
+    border-radius: 50%; background: var(--apricot); box-shadow: 0 0 0 5px var(--night);
+  }
+  .timeline time { color: var(--apricot); font-weight: 500; font-size: .95rem; }
+  .timeline h3 { font-family: "Young Serif", serif; font-weight: 400; font-size: 1.35rem; margin: 2px 0 6px; }
+  .timeline p { color: var(--muted); max-width: 52ch; }
+
+  .reasons { list-style: none; padding: 0; display: grid; gap: 14px; }
+  .reasons li { background: var(--night-2); border-radius: 14px; padding: 18px 22px; }
+  .reason-form { display: flex; gap: 12px; margin-top: 24px; }
+  .reason-form input {
+    flex: 1; min-width: 0; padding: 14px 16px; border: 1px solid #625b85;
+    border-radius: 12px; background: var(--night-2); color: var(--moon);
+    font: inherit;
+  }
+  .reason-form input::placeholder { color: var(--muted); }
+  .reason-form button {
+    padding: 14px 20px; border: 0; border-radius: 12px; background: var(--apricot);
+    color: var(--night); font: 500 1rem "DM Sans", sans-serif; cursor: pointer;
+  }
+  .reason-status { min-height: 1.6em; margin-top: 10px; color: var(--muted); font-size: .9rem; }
+
+  .letter-wrap { text-align: center; }
+  .link-open {
+    display: inline-block; margin: 0 0 18px; color: var(--apricot);
+    font-weight: 500; text-decoration: none; letter-spacing: .04em;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .link-open:hover, .link-open:focus-visible { opacity: .8; transform: translateY(-1px); }
+  .open-btn {
+    position: relative; display: block; width: min(100%, 270px); height: 160px;
+    margin: 0 auto; padding: 0; overflow: hidden; color: var(--night); border: 0;
+    border-radius: 12px; background: #e9956e; cursor: pointer;
+    box-shadow: 0 16px 34px #100d2866; perspective: 500px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .open-btn::before {
+    content: ""; position: absolute; z-index: 2; top: 0; left: 0;
+    border-top: 86px solid #ffd0b5; border-left: 135px solid transparent;
+    border-right: 135px solid transparent; transform-origin: top;
+    transition: transform .65s ease, border-top-color .3s;
+  }
+  .open-btn::after {
+    content: ""; position: absolute; z-index: 1; inset: 0;
+    background: #ffb38a; clip-path: polygon(0 0, 50% 58%, 100% 0, 100% 100%, 0 100%);
+  }
+  .open-btn span {
+    position: absolute; z-index: 3; right: 0; bottom: 15px; left: 0;
+    font: 500 1.05rem "DM Sans", sans-serif;
+  }
+  .open-btn:hover { transform: translateY(-3px); box-shadow: 0 20px 38px #100d2877; }
+  .letter-wrap.is-open .open-btn::before { transform: rotateX(180deg); }
+  .letter-wrap.is-open .open-btn span { color: #6f3650; }
+  .letter {
+    display: grid; grid-template-rows: 0fr; transition: grid-template-rows .7s ease;
+    max-width: 58ch; margin: 0 auto; text-align: left;
+  }
+  .letter.open { grid-template-rows: 1fr; margin-top: 32px; }
+  .letter > div { overflow: hidden; }
+  .letter .paper {
+    background: var(--moon); color: var(--night); border-radius: 18px; padding: 36px;
+    box-shadow: 0 18px 50px #100d2866; opacity: 0; transform: translateY(24px) scale(.97);
+    transition: opacity .45s ease, transform .65s cubic-bezier(.2,.8,.2,1);
+  }
+  .letter.open .paper { opacity: 1; transform: translateY(0) scale(1); }
+  .letter p + p { margin-top: 1em; }
+  .signoff { font-family: "Young Serif", serif; font-size: 1.3rem; margin-top: 1.4em; color: #c4456a; }
+
+  footer { text-align: center; padding: 64px 24px 96px; color: var(--muted); }
+  .heart { color: var(--rose); display: inline-block; cursor: pointer; font-size: 2rem; background: none; border: 0; transition: transform .2s; }
+  .heart:active { transform: scale(1.5); }
+  .whatsapp-share {
+    display: inline-block; margin-top: 18px; color: var(--apricot); font-weight: 500;
+    text-decoration: underline; text-underline-offset: .2em; text-decoration-thickness: 2px;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .whatsapp-share:hover, .whatsapp-share:focus-visible {
+    opacity: .8; transform: translateY(-1px);
+  }
+  .share-status { min-height: 1.6em; margin-top: 10px; font-size: .9rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .star { animation: none; }
+    .heart-rain { display: none; }
+    .intro-screen, .letter, .letter .paper, .open-btn, .open-btn::before { transition: none; }
+    .intro-heart { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+  @media (max-width: 520px) {
+    .reason-form { flex-direction: column; }
+    .reason-form button { min-height: 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="intro-screen" id="intro-screen">
+  <p class="eyebrow">A little universe, made for</p>
+  <h1>Soumya</h1>
+  <p>Tap the heart to open your surprise.</p>
+  <button class="intro-heart" id="intro-heart" type="button" aria-label="Open your surprise">&#10084;</button>
+</div>
+<div class="heart-rain" id="heart-rain" aria-hidden="true"></div>
+
+<header class="hero" id="top">
+  <p class="eyebrow">A little universe, made for</p>
+  <h1 id="her-name" tabindex="-1">My Love</h1>
+  <p class="sub love-line">If love had a name, it would be yours.</p>
+  <p class="sub">My favorite story is the one with you in it.</p>
+</header>
+
+<section id="story">
+  <h2>Our story so far</h2>
+  <ol class="timeline" id="timeline"></ol>
+</section>
+
+<section id="why">
+  <h2>Things I love about you</h2>
+  <ul class="reasons" id="reasons"></ul>
+  <form class="reason-form" id="reason-form">
+    <input id="reason-input" type="text" maxlength="160" placeholder="Add a little love note..." aria-label="Your love note" required>
+    <button type="submit">Add my point</button>
+  </form>
+  <p class="reason-status" id="reason-status" aria-live="polite"></p>
+</section>
+
+<section class="letter-wrap" id="letter-section">
+  <h2>One more thing</h2>
+  <a class="link-open" id="open-link" href="#letter" aria-label="Open my letter">Click here to open</a>
+  <button class="open-btn" id="open-btn" aria-expanded="false" aria-controls="letter"><span>Open my letter</span></button>
+  <div class="letter" id="letter">
+    <div>
+      <div class="paper" id="letter-body"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <button class="heart" id="heart" aria-label="Send a heart">&#10084;</button>
+  <p id="heart-msg">Tap the heart.</p>
+  <a class="whatsapp-share" id="whatsapp-share" href="#" target="_blank" rel="noopener noreferrer">Share this page on WhatsApp</a>
+  <p class="share-status" id="share-status" aria-live="polite"></p>
+</footer>
+
+<script>
+  /* ============ EDIT THIS PART ============ */
+  const CONFIG = {
+    herName: "Soumya",
+    myName: "Sagar",
+    startDate: "2024-02-14T18:00:00",
+
+    timeline: [
+      { date: "The day we met",     title: "First hello",         text: "Write a few lines about where you met and what you remember." },
+      { date: "Our first date",     title: "Nervous and happy",   text: "Describe the place, the food, the moment you knew." },
+      { date: "A favorite trip",    title: "Just us",             text: "A place you went together, or a small day that felt big." },
+      { date: "Today",              title: "Still choosing you",  text: "Add as many moments as you like." }
+    ],
+
+    reasons: [
+      "The way you laugh at your own jokes before you finish them.",
+      "How you make ordinary days feel like plans.",
+      "You are kind to people who can't do anything for you.",
+      "Home feels like wherever you are."
+    ],
+
+    letter: [
+      "My love,",
+      "I made this because I wanted to give you something that is just ours. Write your real words here: what she means to you, what you are grateful for, and what you are looking forward to.",
+      "Thank you for being you."
+    ],
+    heartMessages: [
+      "I love you.", "Still you.", "Always you.", "You're my favorite person.", "Forever, if you'll have me."
+    ]
+  };
+  /* ======================================== */
+
+  const $ = id => document.getElementById(id);
+  const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  document.body.classList.add("intro-active");
+  $("intro-heart").addEventListener("click", () => {
+    $("intro-screen").classList.add("is-leaving");
+    document.body.classList.remove("intro-active");
+    window.setTimeout(() => $("intro-screen").remove(), 750);
+    $("her-name").focus({ preventScroll: true });
+  });
+
+  document.title = "For " + CONFIG.herName;
+  $("her-name").textContent = CONFIG.herName;
+
+  $("timeline").innerHTML = CONFIG.timeline.map(t =>
+    `<li><time>${esc(t.date)}</time><h3>${esc(t.title)}</h3><p>${esc(t.text)}</p></li>`).join("");
+
+  const reasonsList = $("reasons");
+  const reasonStatus = $("reason-status");
+  const savedReasonsKey = "soumya-love-points";
+  let savedReasons = [];
+
+  function addReasonToList(reason) {
+    const item = document.createElement("li");
+    item.textContent = reason;
+    reasonsList.appendChild(item);
+  }
+
+  CONFIG.reasons.forEach(addReasonToList);
+
+  try {
+    const storedReasons = localStorage.getItem(savedReasonsKey);
+    if (storedReasons) {
+      const parsedReasons = JSON.parse(storedReasons);
+      if (!Array.isArray(parsedReasons) || !parsedReasons.every(reason => typeof reason === "string")) {
+        throw new Error("Saved love points have an invalid format.");
+      }
+      savedReasons = parsedReasons;
+      savedReasons.forEach(addReasonToList);
+    }
+  } catch (error) {
+    reasonStatus.textContent = "Couldn't load saved love points in this browser.";
+    console.error("Unable to load saved love points:", error);
+  }
+
+  $("reason-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const input = $("reason-input");
+    const reason = input.value.trim();
+    if (!reason) return;
+
+    savedReasons.push(reason);
+    addReasonToList(reason);
+    input.value = "";
+
+    try {
+      localStorage.setItem(savedReasonsKey, JSON.stringify(savedReasons));
+      reasonStatus.textContent = "Your love point is saved on this device.";
+    } catch (error) {
+      reasonStatus.textContent = "Added for now, but couldn't save it on this device.";
+      console.error("Unable to save love point:", error);
+    }
+  });
+
+  $("letter-body").innerHTML =
+    CONFIG.letter.map(p => `<p>${esc(p)}</p>`).join("") +
+    `<p class="signoff">Yours, ${esc(CONFIG.myName)}</p>`;
+
+  const heartRain = $("heart-rain");
+  for (let i = 0; i < 18; i++) {
+    const heart = document.createElement("span");
+    heart.className = "floating-heart";
+    heart.textContent = "\u2665";
+    heart.style.setProperty("--heart-left", Math.random() * 100 + "%");
+    heart.style.setProperty("--heart-size", (14 + Math.random() * 22) + "px");
+    heart.style.setProperty("--heart-duration", (12 + Math.random() * 10) + "s");
+    heart.style.setProperty("--heart-delay", (-Math.random() * 22) + "s");
+    heartRain.appendChild(heart);
+  }
+
+  const hero = document.querySelector(".hero");
+  for (let i = 0; i < 40; i++) {
+    const st = document.createElement("i");
+    st.className = "star";
+    st.style.left = Math.random() * 100 + "%";
+    st.style.top = Math.random() * 100 + "%";
+    st.style.animationDelay = (Math.random() * 4) + "s";
+    hero.appendChild(st);
+  }
+
+  function toggleLetter() {
+    const open = $("letter").classList.toggle("open");
+    $("letter-section").classList.toggle("is-open", open);
+    $("open-btn").setAttribute("aria-expanded", open);
+    $("open-btn").querySelector("span").textContent = open ? "Close letter" : "Open my letter";
+    const linkText = open ? "Click here to close" : "Click here to open";
+    $("open-link").textContent = linkText;
+    $("open-link").setAttribute("aria-label", open ? "Close my letter" : "Open my letter");
+    return open;
+  }
+
+  $("open-btn").addEventListener("click", toggleLetter);
+  $("open-link").addEventListener("click", event => {
+    event.preventDefault();
+    toggleLetter();
+    $("letter-section").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  const whatsappShare = $("whatsapp-share");
+  const shareStatus = $("share-status");
+  const pageUrl = window.location.href;
+  if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+    const shareText = `A little surprise for you: ${pageUrl}`;
+    whatsappShare.href = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+  } else {
+    whatsappShare.addEventListener("click", event => {
+      event.preventDefault();
+      shareStatus.textContent = "Publish this page online first so WhatsApp can share a clickable HTTPS link.";
+    });
+  }
+
+  let n = 0;
+  $("heart").addEventListener("click", () => {
+    $("heart-msg").textContent = CONFIG.heartMessages[n++ % CONFIG.heartMessages.length];
+  });
+</script>
+</body>
+</html>
